@@ -73,9 +73,13 @@ def recommend_books():
             return jsonify({"error": "No results found, please check for spelling or try a different query"}), 404
         
         recommendations = [] #initialize list to format books
+        related_books = [] 
+
         for item in data.get("items",[]):
             volume_info = item.get("volumeInfo", {})
             title = volume_info.get("title")
+
+            categories = volume_info.get("categories")
 
             if not title:
                 continue
@@ -83,11 +87,32 @@ def recommend_books():
             recommendations.append({
                 "title": title,
                 "author": volume_info.get("authors", []),
-                "description": volume_info.get("description", "No description available :()"),
+                "categories": categories,
+                "description": volume_info.get("description", "No description available :("),
                 "thumbnail": volume_info.get("imageLinks", {}).get("thumbnail", "No image available"),
             })
+            if categories:
+                category_query = f"subject:{categories[0]}"
+                related_api_url = f"https://www.googleapis.com/books/v1/volumes?q={category_query}&key={api_key}&maxResults=5"
+                related_response = requests.get(related_api_url)
+
+                if related_response.status_code == 200:
+                    related_data = related_response.json()
+                    for related_item in related_data.get("items", []):
+                        related_vol_info = related_item.get("volumeInfo", {})
+                        related_books.append({
+                            "title": related_vol_info.get("title", "Couldn't find the title"),
+                            "author": related_vol_info.get("authors", []),
+                            "description": related_vol_info.get("description", "Couldn't find the description"),
+                            "thumbnail": related_vol_info.get("imageLinks", {}).get("thumbnail", "No image available"),
+                        })
+
+
         #convert the list to json and send it as a response
-        return jsonify(recommendations)
+        return jsonify({
+            "primary_recs": recommendations,
+            "related_recs": related_books
+        })
     else:
         return jsonify({"error": "Failed to fetch book recommendations, please try again later."})
 
