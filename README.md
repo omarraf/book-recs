@@ -1,4 +1,4 @@
-# BookRecs
+# BookRecs 
 
 ## Overview
 
@@ -27,8 +27,7 @@ BookRecs is a simple Flask-based application that uses the Google Books API to:
 ## Future Plans
 
 - Implement user accounts to save favorite books.
-- Enhance recommendation logic for more personalized suggestions.
-- Add filters for categories, authors, and availability (e.g., free eBooks).
+- Implement AI for recommendations
 - Improve UI/UX for a more polished frontend.
 
 ---
